@@ -45,10 +45,8 @@ const CustomerRegistration: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [customerId, setCustomerId] = useState('');
   const [editSearchNIC, setEditSearchNIC] = useState('');
-  // const [editSearchName, setEditSearchName] = useState('');
   
   const [formData, setFormData] = useState<CustomerFormData>({
     first_name: '',
@@ -65,7 +63,6 @@ const CustomerRegistration: React.FC = () => {
   // Edit tab states
   const [editCustomers, setEditCustomers] = useState<EditCustomerLite[]>([]);
   const [editFetched, setEditFetched] = useState(false);
-  const [editSearch, setEditSearch] = useState('');
   const [editHasSearched, setEditHasSearched] = useState(false);
   const [editSelectedId, setEditSelectedId] = useState<number | null>(null);
   const [editDetails, setEditDetails] = useState<EditCustomerFull | null>(null);
@@ -160,7 +157,6 @@ const CustomerRegistration: React.FC = () => {
       });
       
       setCustomerId(response.data.customer_id);
-      setIsSubmitted(true);
       setCurrentStep(3);
     } catch (error: any) {
       alert(error.response?.data?.message || 'Failed to register customer');
@@ -209,7 +205,6 @@ const CustomerRegistration: React.FC = () => {
     });
     setErrors({});
     setCurrentStep(1);
-    setIsSubmitted(false);
     setCustomerId('');
   };
 
@@ -232,8 +227,8 @@ const CustomerRegistration: React.FC = () => {
     }
   }, [activeTab, editFetched]);
 
-  // Replace the filteredEditCustomers useMemo:
-    const filteredEditCustomers = useMemo(() => {
+  // Fixed useMemo with proper dependency array
+  const filteredEditCustomers = useMemo(() => {
     if (!editHasSearched) return [];
     
     const nicQuery = editSearchNIC.trim();
@@ -243,7 +238,7 @@ const CustomerRegistration: React.FC = () => {
     
     // Exact match only for security
     return editCustomers.filter(c => c.nic === nicQuery);
-  }, [editCustomers, editHasSearched]);
+  }, [editCustomers, editHasSearched, editSearchNIC]); // Added editSearchNIC to dependencies
 
   const loadEditDetails = async (id: number) => {
     setEditLoading(true);
