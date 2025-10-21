@@ -45,17 +45,15 @@ const BranchManagement: React.FC = () => {
     fetchBranches();
   }, []);
 
- const fetchBranches = async () => {
+const fetchBranches = async () => {
   try {
     const token = localStorage.getItem('token');
-    // Remove the unused 'response' variable assignment
-    await axios.get('/api/admin/branches', {
+    const result = await axios.get('/api/admin/branches', {
       headers: {
         Authorization: `Bearer ${token}`
       }
-    }).then(response => {
-      setBranches(response.data.branches);
     });
+    setBranches(result.data.branches);
   } catch (error: any) {
     console.error('Failed to fetch branches:', error);
     alert('Failed to load branches');
