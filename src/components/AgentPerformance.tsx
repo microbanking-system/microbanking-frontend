@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback} from 'react';
 import axios from 'axios';
 import { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -65,13 +65,13 @@ const ClockIcon = () => (
   </svg>
 );
 
-const RefreshIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-    <polyline points="23 4 23 10 17 10"></polyline>
-    <polyline points="1 20 1 14 7 14"></polyline>
-    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-  </svg>
-);
+// const RefreshIcon = () => (
+//   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+//     <polyline points="23 4 23 10 17 10"></polyline>
+//     <polyline points="1 20 1 14 7 14"></polyline>
+//     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+//   </svg>
+// );
 
 const InboxIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="48" height="48">
@@ -121,12 +121,12 @@ const AgentPerformance: React.FC = () => {
   const [transactionTrend, setTransactionTrend] = useState<TransactionTrendData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchPerformanceData();
-    fetchAnalytics();
-  }, []);
+  // useEffect(() => {
+  //   fetchPerformanceData();
+  //   fetchAnalytics();
+  // }, []);
 
-  const fetchPerformanceData = async () => {
+  const fetchPerformanceData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get('/api/agent/performance', {
@@ -150,9 +150,9 @@ const AgentPerformance: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       
@@ -175,7 +175,12 @@ const AgentPerformance: React.FC = () => {
     } catch (error: any) {
       console.error('Failed to fetch analytics data:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchPerformanceData();
+    fetchAnalytics();
+  }, [fetchPerformanceData, fetchAnalytics]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-LK', {
