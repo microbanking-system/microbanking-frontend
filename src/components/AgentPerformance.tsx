@@ -247,7 +247,7 @@ const AgentPerformance: React.FC = () => {
             <span className="section-subtitle">Essential performance metrices</span>
           </div>
         <div className="section-title-bar">
-          <h3 className="section-title"></h3>
+          <h3 className="section-title">Performance Metrics</h3>
         </div>
 
         
