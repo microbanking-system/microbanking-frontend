@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 interface Agent {
@@ -35,11 +35,7 @@ const TeamManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  useEffect(() => {
-    fetchAgents();
-  }, []);
-
-  const fetchAgents = async () => {
+  const fetchAgents = useCallback(async () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
@@ -56,7 +52,11 @@ const TeamManagement: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAgents();
+  }, [fetchAgents]);
 
   const handleAgentSelect = (agent: Agent) => {
     setSelectedAgent(agent);
@@ -86,21 +86,6 @@ const TeamManagement: React.FC = () => {
       fullName.includes(searchLower)
     );
   });
-
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-LK', {
-      style: 'currency',
-      currency: 'LKR'
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
   const getPerformanceBadge = (transactions: number) => {
     if (transactions >= 50) return 'performance-high';
@@ -278,11 +263,7 @@ const AgentDetailsModal: React.FC<AgentDetailsModalProps> = ({ agent, performanc
   const [agentTransactions, setAgentTransactions] = useState<any[]>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
 
-  useEffect(() => {
-    fetchAgentTransactions();
-  }, [agent.employee_id]);
-
-  const fetchAgentTransactions = async () => {
+  const fetchAgentTransactions = useCallback(async () => {
     setIsLoadingTransactions(true);
     try {
       const token = localStorage.getItem('token');
@@ -297,7 +278,11 @@ const AgentDetailsModal: React.FC<AgentDetailsModalProps> = ({ agent, performanc
     } finally {
       setIsLoadingTransactions(false);
     }
-  };
+  }, [agent.employee_id]);
+
+  useEffect(() => {
+    fetchAgentTransactions();
+  }, [fetchAgentTransactions]);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-LK', {

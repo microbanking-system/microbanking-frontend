@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 
 interface BranchTransaction {
@@ -30,9 +30,29 @@ const TransactionReports: React.FC = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const datePickerRef = useRef<HTMLDivElement>(null);
 
+  const fetchTransactionData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/manager/transactions', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: dateRange
+      });
+      setTransactions(response.data.transactions);
+      setSummary(response.data.summary);
+    } catch (error: any) {
+      console.error('Failed to fetch transactions:', error);
+      alert('Failed to load transaction data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dateRange]);
+
   useEffect(() => {
     fetchTransactionData();
-  }, [dateRange]);
+  }, [fetchTransactionData]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -96,26 +116,6 @@ const TransactionReports: React.FC = () => {
       end: end.toISOString().split('T')[0]
     });
     setShowDatePicker(false);
-  };
-
-  const fetchTransactionData = async () => {
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('/api/manager/transactions', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        params: dateRange
-      });
-      setTransactions(response.data.transactions);
-      setSummary(response.data.summary);
-    } catch (error: any) {
-      console.error('Failed to fetch transactions:', error);
-      alert('Failed to load transaction data');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const formatCurrency = (amount: number): string => {
