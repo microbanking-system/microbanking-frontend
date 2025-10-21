@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomerRegistration from './CustomerRegistration';
 import AccountCreation from './AccountCreation';
@@ -76,7 +76,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     localStorage.setItem('managerDashboard.activeSection', managerActiveSection);
   }, [managerActiveSection]);
 
-  // Add token expiration check
+  // Memoize handleLogout to fix the useEffect dependency warning
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    onLogout();
+    navigate('/');
+  }, [onLogout, navigate]);
+
+  // Add token expiration check with proper dependency
   useEffect(() => {
     const checkToken = () => {
       const token = localStorage.getItem('token');
@@ -88,19 +96,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     checkToken();
     const interval = setInterval(checkToken, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [handleLogout]); // Added handleLogout to dependencies
 
   // Save sidebar state to localStorage
   useEffect(() => {
     localStorage.setItem('dashboard.sidebarCollapsed', sidebarCollapsed.toString());
   }, [sidebarCollapsed]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    onLogout();
-    navigate('/');
-  };
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -169,7 +170,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   ];
 
   const managerMenuItems = [
-
     {
       id: 'customers',
       label: 'Customer Accounts',
@@ -185,8 +185,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       label: 'Transaction Summary',
       icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>)
     },
-    
-    
   ];
 
   // Get current menu items and active section based on role

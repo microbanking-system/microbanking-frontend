@@ -57,7 +57,6 @@ const FixedDepositCreation: React.FC = () => {
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [errors, setErrors] = useState<FormErrors>({});
   const [successMessage, setSuccessMessage] = useState('');
-  const [customers, setCustomers] = useState<Customer[]>([]);
   const [fdPlans, setFdPlans] = useState<FdPlan[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -159,10 +158,7 @@ const FixedDepositCreation: React.FC = () => {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const [customersRes, plansRes, accountsRes] = await Promise.all([
-        axios.get('/api/agent/customers', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
+      const [plansRes, accountsRes] = await Promise.all([
         axios.get('/api/public/fd-plans', {
           headers: { Authorization: `Bearer ${token}` }
         }),
@@ -171,7 +167,6 @@ const FixedDepositCreation: React.FC = () => {
         })
       ]);
 
-      setCustomers(customersRes.data.customers || []);
       setFdPlans(plansRes.data.fd_plans || plansRes.data || []);
       setAccounts(accountsRes.data.accounts || []);
     } catch (error: any) {
