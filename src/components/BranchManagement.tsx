@@ -85,36 +85,36 @@ const fetchBranches = async () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddBranch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+ const handleAddBranch = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!validateForm()) return;
+  
+  setIsLoading(true);
+  try {
+    const token = localStorage.getItem('token');
+    await axios.post('/api/admin/branches', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post('/api/admin/branches', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      setSuccessMessage(`Branch "${formData.name}" created successfully!`);
-      setFormData({
-        name: '',
-        contact_no_1: '',
-        contact_no_2: '',
-        address: '',
-        email: ''
-      });
-      setErrors({});
-      setIsAddingBranch(false);
-      fetchBranches(); // Refresh the branch list
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to create branch');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    setSuccessMessage(`Branch "${formData.name}" created successfully!`);
+    setFormData({
+      name: '',
+      contact_no_1: '',
+      contact_no_2: '',
+      address: '',
+      email: ''
+    });
+    setErrors({});
+    setIsAddingBranch(false);
+    fetchBranches(); // Refresh the branch list
+  } catch (error: any) {
+    alert(error.response?.data?.message || 'Failed to create branch');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleDeleteBranch = async (branchId: number, branchName: string) => {
     if (!window.confirm(`Are you sure you want to delete branch "${branchName}"? This action will also remove associated contact information.`)) {
