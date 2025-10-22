@@ -29,6 +29,7 @@ interface User {
   date_of_birth: string;
   branch_id: number;
   contact_id: number;
+  employee_status?: 'Active' | 'Inactive';
   created_at: string;
 }
 
@@ -48,12 +49,14 @@ const UserManagement: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [newEmployeeId, setNewEmployeeId] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [formData, setFormData] = useState<UserFormData>({
     role: 'Agent',
     username: '',
@@ -78,6 +81,14 @@ const UserManagement: React.FC = () => {
 
   // Fetch users on component mount
   useEffect(() => {
+    // Load current user id from localStorage
+    try {
+      const u = localStorage.getItem('user');
+      if (u) {
+        const parsed = JSON.parse(u);
+        if (parsed && typeof parsed.id === 'number') setCurrentUserId(parsed.id);
+      }
+    } catch {}
     fetchUsers();
   }, []);
 
@@ -233,25 +244,25 @@ const UserManagement: React.FC = () => {
   };
 
   const handleDeleteUser = async (employeeId: number, userName: string) => {
-    if (!window.confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
-      return;
+    const handleToggleUserStatus = async (user: User) => {
+    const targetStatus = user.employee_status === 'Active' ? 'Inactive' : 'Active';
+    if (targetStatus === 'Inactive') {
+      if (!window.confirm(`Deactivate ${user.first_name} ${user.last_name}? They won't be able to login until reactivated.`)) return;
     }
 
-    setIsDeleting(employeeId);
+    setTogglingId(user.employee_id);
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`/api/admin/users/${employeeId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      await axios.patch(`/api/admin/users/${user.employee_id}/status`, { status: targetStatus }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       
-      setSuccessMessage(`User "${userName}" deleted successfully`);
-      fetchUsers(); // Refresh the user list
+      setSuccessMessage(`User "${user.first_name} ${user.last_name}" ${targetStatus === 'Active' ? 'activated' : 'deactivated'} successfully`);
+      fetchUsers();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to delete user');
+      alert(error.response?.data?.message || 'Failed to update user status');
     } finally {
-      setIsDeleting(null);
+      setTogglingId(null);
     }
   };
 
@@ -379,6 +390,7 @@ const UserManagement: React.FC = () => {
                   <th>Role</th>
                   <th>NIC</th>
                   <th>Branch</th>
+                  <th>Status</th>
                   <th>Joined Date</th>
                   <th>Actions</th>
                 </tr>
@@ -410,20 +422,27 @@ const UserManagement: React.FC = () => {
                       <span className="branch-id">{user.branch_id}</span>
                     </td>
                     <td>
+                      <span className={`role-badge ${user.employee_status === 'Active' ? 'role-manager' : 'role-agent'}`}>
+                        {user.employee_status || 'Active'}
+                      </span>
+                    </td>
+                    <td>
                       <span className="join-date">{formatDate(user.created_at)}</span>
                     </td>
                     <td>
                       <div className="action-buttons">
-                        <button 
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDeleteUser(user.employee_id, `${user.first_name} ${user.last_name}`)}
-                          disabled={isDeleting === user.employee_id}
-                          title={`Delete ${user.first_name} ${user.last_name}`}
+                        <button
+                          className={`btn ${user.employee_status === 'Active' ? 'btn-danger' : 'btn-secondary'} btn-sm`}
+                          onClick={() => handleToggleUserStatus(user)}
+                          disabled={togglingId === user.employee_id || (user.employee_status === 'Active' && currentUserId === user.employee_id)}
+                          title={user.employee_status === 'Active' ? `Deactivate ${user.first_name} ${user.last_name}` : `Activate ${user.first_name} ${user.last_name}`}
                         >
-                          {isDeleting === user.employee_id ? (
+                          {togglingId === user.employee_id ? (
                             <span className="loading-spinner"></span>
                           ) : (
-                            'Delete'
+                            <span className="loading-spinner"></span>
+                          ) : (
+                            user.employee_status === 'Active' ? 'Deactivate' : 'Activate'
                           )}
                         </button>
                       </div>
