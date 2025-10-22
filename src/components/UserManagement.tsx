@@ -440,11 +440,10 @@ const UserManagement: React.FC = () => {
                           {togglingId === user.employee_id ? (
                             <span className="loading-spinner"></span>
                           ) : (
-                            <span className="loading-spinner"></span>
-                          )} : (
                             user.employee_status === 'Active' ? 'Deactivate' : 'Activate'
                           )}
                         </button>
+
                       </div>
                     </td>
                   </tr>
