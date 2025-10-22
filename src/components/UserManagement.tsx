@@ -441,7 +441,7 @@ const UserManagement: React.FC = () => {
                             <span className="loading-spinner"></span>
                           ) : (
                             <span className="loading-spinner"></span>
-                          ) : (
+                          )} : (
                             user.employee_status === 'Active' ? 'Deactivate' : 'Activate'
                           )}
                         </button>
