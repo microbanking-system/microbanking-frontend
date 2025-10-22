@@ -48,7 +48,6 @@ const UserManagement: React.FC = () => {
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState<number | null>(null);
   const [togglingId, setTogglingId] = useState<number | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [successMessage, setSuccessMessage] = useState('');
@@ -396,7 +395,7 @@ const UserManagement: React.FC = () => {
               </thead>
               <tbody>
                 {filteredUsers.map((user) => (
-                  <tr key={user.employee_id} className={isDeleting === user.employee_id ? 'deleting' : ''}>
+                  <tr key={user.employee_id}>
                     <td>
                       <span className="employee-id">{user.employee_id}</span>
                     </td>
