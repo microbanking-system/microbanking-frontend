@@ -243,8 +243,7 @@ const UserManagement: React.FC = () => {
     setSuccessMessage('');
   };
 
-  const handleDeleteUser = async (employeeId: number, userName: string) => {
-    const handleToggleUserStatus = async (user: User) => {
+  const handleToggleUserStatus = async (user: User) => {
     const targetStatus = user.employee_status === 'Active' ? 'Inactive' : 'Active';
     if (targetStatus === 'Inactive') {
       if (!window.confirm(`Deactivate ${user.first_name} ${user.last_name}? They won't be able to login until reactivated.`)) return;
